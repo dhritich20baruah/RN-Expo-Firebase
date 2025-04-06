@@ -1,32 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import { auth } from './firebaseConfig';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import SignInUp from "./component/signInSignUp";
 
-export default async function App() {
-  try{
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      "testuser@example.com",
-      "password123"
-    )
-    console.log("✅ Authentication is working! User:", userCredential.user)
-  } catch (error){
-    console.error("❌ Authentication Error:", error.message);
-  }
+const Stack = createNativeStackNavigator();
+
+export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app! OK</Text>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={SignInUp} />
+      </Stack.Navigator>
       <StatusBar style="auto" />
-    </View>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
