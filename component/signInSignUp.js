@@ -24,7 +24,7 @@ export default function SignInUp() {
     try {
       const user = await signInWithEmailAndPassword(auth, email, password);
       if (user) {
-        navigation.navigate("User");
+        navigation.navigate("FirebaseDate");
         setEmail("");
         setPassword("");
       }
