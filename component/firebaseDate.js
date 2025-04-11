@@ -4,6 +4,7 @@ import {
   View,
   SafeAreaView,
   Alert,
+  FlatList,
   TextInput,
   TouchableOpacity,
 } from "react-native";
@@ -12,20 +13,20 @@ import { db } from "../firebaseConfig";
 import {
   collection,
   addDoc,
-  getDoc,
+  getDocs,
   updateDoc,
   deleteDoc,
   doc,
   query,
   where,
 } from "firebase/firestore";
-import { auth } from "../firebaseConfig";
+import { getAuth } from "firebase/auth";
 import { useEffect, useState } from "react";
 
 export default function FirebaseData() {
   const [task, setTask] = useState("");
   const [todos, setTodos] = useState([]);
-  const auth = auth();
+  const auth = getAuth();
   const user = auth.currentUser;
   const todosCollection = collection(db, "todos");
 
@@ -98,7 +99,7 @@ export default function FirebaseData() {
               </Text>
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => updateTodo(item.id, item.completed)}
+                onPress={() => updateTodos(item.id, item.completed)}
               >
                 <Text style={styles.buttonText}>
                   {item.completed ? "Undo" : "Complete"}
