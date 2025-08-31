@@ -26,6 +26,8 @@ import { useEffect, useState } from "react";
 export default function FirebaseData() {
   const [task, setTask] = useState("");
   const [todos, setTodos] = useState([]);
+  const [editId, setEditId] = useState(null); // ID of the todo being edited
+  const [editText, setEditText] = useState(""); // Edited text value
   const auth = getAuth();
   const user = auth.currentUser;
   const todosCollection = collection(db, "todos");
@@ -64,6 +66,21 @@ export default function FirebaseData() {
     fetchTodos();
   };
 
+  const startEditing = (todo) => {
+    setEditId(todo.id);
+    setEditText(todo.task);
+  };
+
+  const saveEdit = async () => {
+    if (!editText.trim()) return;
+
+    const todoRef = doc(db, "todos", editId);
+    await updateDoc(todoRef, { task: editText });
+    setEditId(null);
+    setEditText("");
+    fetchTodos();
+  };
+
   const deleteTodo = async (id) => {
     const todoDoc = doc(db, "todos", id);
     await deleteDoc(todoDoc);
@@ -89,28 +106,60 @@ export default function FirebaseData() {
           data={todos}
           renderItem={({ item }) => (
             <View style={styles.todoContainer}>
-              <Text
-                style={{
-                  textDecorationLine: item.completed ? "line-through" : "none",
-                  flex: 1,
-                }}
-              >
-                {item.task}
-              </Text>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => updateTodos(item.id, item.completed)}
-              >
-                <Text style={styles.buttonText}>
-                  {item.completed ? "Undo" : "Complete"}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => deleteTodo(item.id)}
-              >
-                <Text style={styles.buttonText}>Delete</Text>
-              </TouchableOpacity>
+              {editId === item.id ? (
+                <>
+                  <TextInput
+                    value={editText}
+                    onChangeText={setEditText}
+                    style={[styles.input, { flex: 1 }]}
+                  />
+                  <TouchableOpacity onPress={saveEdit} style={styles.button}>
+                    <Text style={styles.buttonText}>Save</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setEditId(null);
+                      setEditText("");
+                    }}
+                    style={styles.button}
+                  >
+                    <Text style={styles.buttonText}>Cancel</Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <>
+                  <Text
+                    style={{
+                      textDecorationLine: item.completed
+                        ? "line-through"
+                        : "none",
+                      flex: 1,
+                    }}
+                  >
+                    {item.task}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => updateTodos(item.id, item.completed)}
+                  >
+                    <Text style={styles.buttonText}>
+                      {item.completed ? "Undo" : "Complete"}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => deleteTodo(item.id)}
+                  >
+                    <Text style={styles.buttonText}>Delete</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => startEditing(item)}
+                  >
+                    <Text style={styles.buttonText}>Modify</Text>
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
           )}
           keyExtractor={(item) => item.id}
